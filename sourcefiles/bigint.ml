@@ -57,7 +57,9 @@ module Bigint = struct
 
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
-        then Bigint (neg1, add' value1 value2 0)
+            then Bigint (neg1, add' value1 value2 0)
+        else if neg1 = Neg
+            then Bigint (Neg, [1])
         else zero
 
     let sub = add
