@@ -174,8 +174,14 @@ module Bigint = struct
             let result, _ = divrem value1 value2 in
             Bigint(Neg, result)
 
-    let rem = add
-
+    let rem (Bigint (neg1, value1)) (Bigint (neg2, value2))=
+        if neg1 = neg2 
+            then let _, remainder = divrem value1 value2 in
+            Bigint(Pos, remainder) 
+        else 
+            let _, remainder = divrem value1 value2 in
+            Bigint(Neg, remainder)
+ 
     let pow = add
 end
 
