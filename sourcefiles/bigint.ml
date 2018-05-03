@@ -90,7 +90,7 @@ module Bigint = struct
         | car1::cdr1, car2::cdr2, carry ->
           let sum = car1 + car2 + carry
           in  sum mod radix :: add' cdr1 cdr2 (sum / radix)
-    (*
+    
     let rec sub' list1 list2 borrow = match (list1, list2, borrow ) with
         | list1, [], 0       -> list1
         | [], list2, 0       -> (* error this should not happen *)
@@ -100,7 +100,6 @@ module Bigint = struct
         | [], list2, borrow        ->
         |car1::cdr1, car2::cdr2, borrow ->
     
-    *)
 
 
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
