@@ -98,9 +98,10 @@ module Bigint = struct
         | [], list2, borrow     -> []  (*should not happen*)
         | car1::cdr1, car2::cdr2, borrow ->
             let difference= car1 - car2 - borrow in
-            if difference >= 0
-                then car1-car2-borrow:: sub' cdr1  cdr2  0
-            else car1+radix-car2-borrow:: sub' cdr1 cdr2  1
+            if difference>= 0
+                then car1-car2-borrow::sub' cdr1  cdr2  0
+            else car1+radix-car2::sub' cdr1 cdr2  1
+    
 
     let double number = add' number number 0 
             
@@ -121,9 +122,10 @@ module Bigint = struct
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
             then Bigint (neg1, add' value1 value2 0)
-        else if (cmp value1 value2) >0 
-            then Bigint (neg1, trimzeros(sub' value1 value2 0))
-        else  Bigint(neg2, trimzeros(sub' value2 value1 0))
+        else let compare = cmp value1 value2 in
+            if compare > 0 then Bigint (neg1, trimzeros(sub' value1 value2 0))
+            else if compare<0 then Bigint(neg2, trimzeros(sub' value2 value1 0))
+            else zero 
             
 
     let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) = 
