@@ -92,21 +92,22 @@ module Bigint = struct
           in  sum mod radix :: add' cdr1 cdr2 (sum / radix)
     
     let rec sub' list1 list2 borrow = match (list1, list2, borrow ) with
-        | list1, [], 0       -> list1
-        | [], list2, 0       -> (* error this should not happen *)
-        | list1, [], borrow        ->
-            let dif = (car list1) -1 (*subtract one because of carry*)
-            
-        | [], list2, borrow        ->
-        |car1::cdr1, car2::cdr2, borrow ->
+        | list1, [], 0          -> list1
+        | [], list2, 0          -> []  (*should not happen*)
+        | list1, [], borrow     ->sub' list1 [borrow] 0
+        | [], list2, borrow     -> []  (*should not happen*)
+        | car1::cdr1, car2::cdr2, borrow ->
+            let difference= car1 - car2 - borrow in
+            if difference>= 0
+                then car1-car2-borrow::sub' (cdr list1) (cdr list2) 0
+            else car1+radix-car2::sub' (cdr list1) (cdr list2) 1
+                
     
 
 
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
             then Bigint (neg1, add' value1 value2 0)
-        else if neg1 = Neg
-            then Bigint (Neg, [1])
         else zero
 
     let sub = add
