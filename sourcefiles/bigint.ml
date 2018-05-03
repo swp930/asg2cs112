@@ -52,18 +52,24 @@ module Bigint = struct
     ** Positive if list1 is of greater magnitude
     ** Zero if equal
     *)
-    (*
     let rec cmp list1 list2=
         if (List.length list1) > (List.length list2) 
             then 1
         else if (List.length list1) < (List.length list2)
             then -1
-        else match (list1, list2, carry) with
-            | [],[]            ->
-            | list1, []        ->
-            | [], list2        ->
-            | list1, list2
-    *)
+        else match (list1, list2) with
+            | [],[]            -> 0
+            | list1, []        -> 1
+            | [], list2        -> -1
+            | list1, list2     ->
+                let revList1 = reverse list1 in
+                let revList2 = reverse list2 in
+                if (car revList1) > (car revList2)
+                    then 1
+                else if (car revList1) < (car revList2)
+                    then -1
+                else cmp (reverse (cdr revList1)) (reverse (cdr revList2))
+                
 
     let trimzeros list =
         let rec trimzeros' list' = match list' with
