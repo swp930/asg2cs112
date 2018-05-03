@@ -98,13 +98,13 @@ module Bigint = struct
         | [], list2, borrow     -> []  (*should not happen*)
         | car1::cdr1, car2::cdr2, borrow ->
             let difference= car1 - car2 - borrow in
-            if difference>= 0
-                then car1-car2-borrow::sub' cdr1  cdr2  0
-            else car1+radix-car2::sub' cdr1 cdr2  1
-    
+            if difference >= 0
+                then car1-car2-borrow:: sub' cdr1  cdr2  0
+            else car1+radix-car2-borrow:: sub' cdr1 cdr2  1
 
     let double number = add' number number 0 
-            
+    
+    (*
     let rec mul' list1 powerof2 list2 =
         let comparison = cmp powerof2 list1 in
         if comparison > 0 
@@ -115,6 +115,34 @@ module Bigint = struct
                 then remainder, product
             else 
                 (sub' remainder powerof2 0), (add' product list2 0)
+    *)
+
+    (*
+    
+    let rec  mul' list1 power list2 = 
+        if cmp power list1 > 0
+        then list1, [0]
+        else let remainder, product =
+            mul' list1 (double power) (double list2)
+        in if cmp remainder power < 0
+            then remainder, product
+        else (sub' remainder power 0), (add' product list2 0)
+    *)
+
+    let concat_list list1 = 
+    float_of_string (String.concat "" 
+        (List.rev_map string_of_int list1))
+
+
+    let rec  mul' list1 power list2 = 
+        if concat_list power > concat_list list1
+        then list1, [0]
+        else let remainder, product =
+            mul' list1 (double power) (double list2)
+        in if concat_list remainder < concat_list power
+            then remainder, product
+        else (sub' remainder power 0), (add' product list2 0)
+
 
 
 
@@ -122,10 +150,9 @@ module Bigint = struct
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
             then Bigint (neg1, add' value1 value2 0)
-        else let compare = cmp value1 value2 in
-            if compare > 0 then Bigint (neg1, trimzeros(sub' value1 value2 0))
-            else if compare<0 then Bigint(neg2, trimzeros(sub' value2 value1 0))
-            else zero 
+        else if (cmp value1 value2) >0 
+            then Bigint (neg1, trimzeros(sub' value1 value2 0))
+        else  Bigint(neg2, trimzeros(sub' value2 value1 0))
             
 
     let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) = 
@@ -148,17 +175,17 @@ module Bigint = struct
         
 
     let mul (Bigint (neg1, value1)) (Bigint (neg2, value2))=
-        if neg1=neg2 
-            then let _, product = mul' value1 [1] value2 in
-            Bigint(Pos, product)
+        if neg1 = neg2 
+            then let _, product = 
+               mul' value1 [1] value2 in Bigint(Pos, product)
         else 
-            let _, product = mul' value1 [1] value2 in
-            Bigint(Neg, product) 
+            let _, product = 
+              mul'  value1 [1] value2 in Bigint(Neg, product) 
+    
     let div = add
 
     let rem = add
 
     let pow = add
-
 end
 
