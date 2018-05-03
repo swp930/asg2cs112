@@ -108,7 +108,11 @@ module Bigint = struct
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
             then Bigint (neg1, add' value1 value2 0)
-        else zero
+        else let compare = cmp value1 value2 in
+            if compare > 0 then Bigint (neg1, trimzeros(sub' value1 value2 0))
+            else if compare<0 then Bigint(neg2, trimzeros(sub' value2 value1 0))
+            else zero 
+            
 
     let sub = add
 
