@@ -46,6 +46,36 @@ module Bigint = struct
                        ((if sign = Pos then "" else "-") ::
                         (map string_of_int reversed))
 
+    (* cmp 
+    ** Compares list1 and list2. Negative if list1 is of
+    ** smaller magnitude. 
+    ** Positive if list1 is of greater magnitude
+    ** Zero if equal
+    *)
+    (*
+    let rec cmp list1 list2=
+        if (List.length list1) > (List.length list2) 
+            then 1
+        else if (List.length list1) < (List.length list2)
+            then -1
+        else match (list1, list2, carry) with
+            | [],[]            ->
+            | list1, []        ->
+            | [], list2        ->
+            | list1, list2
+    *)
+
+    let trimzeros list =
+        let rec trimzeros' list' = match list' with
+            | []       -> []
+            | [0]      -> []
+            | car::cdr ->
+                 let cdr' = trimzeros' cdr
+                 in  match car, cdr' with
+                     | 0, [] -> []
+                     | car, cdr' -> car::cdr'
+        in trimzeros' list
+
     let rec add' list1 list2 carry = match (list1, list2, carry) with
         | list1, [], 0       -> list1
         | [], list2, 0       -> list2
@@ -54,6 +84,18 @@ module Bigint = struct
         | car1::cdr1, car2::cdr2, carry ->
           let sum = car1 + car2 + carry
           in  sum mod radix :: add' cdr1 cdr2 (sum / radix)
+    (*
+    let rec sub' list1 list2 borrow = match (list1, list2, borrow ) with
+        | list1, [], 0       -> list1
+        | [], list2, 0       -> (* error this should not happen *)
+        | list1, [], borrow        ->
+            let dif = (car list1) -1 (*subtract one because of carry*)
+            
+        | [], list2, borrow        ->
+        |car1::cdr1, car2::cdr2, borrow ->
+    
+    *)
+
 
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
