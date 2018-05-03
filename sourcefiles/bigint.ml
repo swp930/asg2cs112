@@ -116,22 +116,18 @@ module Bigint = struct
                 (trimzeros(sub' remainder powerof2 0)), (add' product list2 0)
 
 
-    (*
-    let concat_list list1 = 
-    float_of_string (String.concat "" 
-         (List.rev_map string_of_int list1))
+    let rec divrem' dividend powerof2 divisor=
+        if (cmp divisor dividend) > 0 
+            then [0], dividend 
+        else let quotient, remainder =
+            divrem' dividend (double powerof2) (double divisor)in
+            if (cmp divisor remainder) > 0
+                then quotient, remainder
+            else
+                (add' quotient powerof2 0), (trimzeros(sub' remainder divisor 0))
 
-
-    let rec  mul' list1 power list2 = 
-        if concat_list power > concat_list list1
-        then list1, [0]
-        else let remainder, product =
-            mul' list1 (double power) (double list2)
-        in if concat_list remainder < concat_list power
-            then remainder, product
-        else (sub' remainder power 0), (add' product list2 0)
-    *)
-
+    let divrem list1 list2 =
+        divrem' list1 [1] list2
 
 
 
@@ -164,13 +160,19 @@ module Bigint = struct
 
     let mul (Bigint (neg1, value1)) (Bigint (neg2, value2))=
         if neg1 = neg2 
-            then let _, product = 
-               mul' value1 [1] value2 in Bigint(Pos, product)
+            then let _, product = mul' value1 [1] value2 in 
+            Bigint(Pos, product)
         else 
-            let _, product = 
-              mul'  value1 [1] value2 in Bigint(Neg, product) 
+            let _, product = mul'  value1 [1] value2 in 
+            Bigint(Neg, product) 
     
-    let div = add
+    let div (Bigint (neg1, value1)) (Bigint (neg2, value2))=
+        if neg1 = neg2 
+            then let result, _ = divrem value1 value2 in
+            Bigint(Pos, result)
+        else
+            let result, _ = divrem value1 value2 in
+            Bigint(Neg, result)
 
     let rem = add
 
