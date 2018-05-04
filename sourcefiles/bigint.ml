@@ -18,7 +18,7 @@ module Bigint = struct
     let strsub    = String.sub
     let zero      = Bigint (Pos, [])
 
-    let charlist_of_string str = 
+    let charlist_of_string str =
         let last = strlen str - 1
         in  let rec charlist pos result =
             if pos < 0
@@ -46,14 +46,14 @@ module Bigint = struct
                        ((if sign = Pos then "" else "-") ::
                         (map string_of_int reversed))
 
-    (* cmp 
+    (* cmp
     ** Compares list1 and list2. Negative if list1 is of
-    ** smaller magnitude. 
+    ** smaller magnitude.
     ** Positive if list1 is of greater magnitude
     ** Zero if equal
     *)
     let rec cmp list1 list2=
-        if (List.length list1) > (List.length list2) 
+        if (List.length list1) > (List.length list2)
             then 1
         else if (List.length list1) < (List.length list2)
             then -1
@@ -69,7 +69,7 @@ module Bigint = struct
                 else if (car revList1) < (car revList2)
                     then -1
                 else cmp (reverse (cdr revList1)) (reverse (cdr revList2))
-                
+
 
     let trimzeros list =
         let rec trimzeros' list' = match list' with
@@ -90,7 +90,7 @@ module Bigint = struct
         | car1::cdr1, car2::cdr2, carry ->
             let sum = car1 + car2 + carry
             in  sum mod radix :: add' cdr1 cdr2 (sum / radix)
-    
+
     let rec sub' list1 list2 borrow = match (list1, list2, borrow ) with
         | list1, [], 0          -> list1
         | [], list2, 0          -> []  (*should not happen*)
@@ -102,23 +102,23 @@ module Bigint = struct
                 then car1-car2-borrow:: sub' cdr1  cdr2  0
             else car1+radix-car2-borrow:: sub' cdr1 cdr2  1
 
-    let double number = add' number number 0 
-    
+    let double number = add' number number 0
+
     let rec mul' list1 powerof2 list2 =
         let comparison = cmp powerof2 list1 in
-        if comparison > 0 
+        if comparison > 0
            then list1, [0]
         else let remainder, product=
             mul' list1 (double powerof2) (double list2) in
-            if (cmp powerof2 remainder)> 0 
+            if (cmp powerof2 remainder)> 0
                 then remainder, product
-            else 
+            else
                 (trimzeros(sub' remainder powerof2 0)), (add' product list2 0)
 
 
     let rec divrem' dividend powerof2 divisor=
-        if (cmp divisor dividend) > 0 
-            then [0], dividend 
+        if (cmp divisor dividend) > 0
+            then [0], dividend
         else let quotient, remainder =
             divrem' dividend (double powerof2) (double divisor)in
             if (cmp divisor remainder) > 0
@@ -134,40 +134,40 @@ module Bigint = struct
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
             then Bigint (neg1, add' value1 value2 0)
-        else if (cmp value1 value2) >0 
+        else if (cmp value1 value2) >0
             then Bigint (neg1, trimzeros(sub' value1 value2 0))
         else  Bigint(neg2, trimzeros(sub' value2 value1 0))
-            
 
-    let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) = 
+
+    let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         match(neg1, neg2) with
             | Pos, Pos    ->
                 let compare = cmp value1 value2 in
-                if compare > 0 
+                if compare > 0
                     then Bigint (Pos, trimzeros(sub' value1 value2 0))
-                else 
+                else
                     Bigint (Neg, trimzeros(sub' value2 value1 0))
             | Pos, Neg    -> (Bigint (Pos, add' value1 value2 0))
             | Neg, Pos    -> (Bigint (Neg, add' value1 value2 0))
             | Neg, Neg    ->
                 if (cmp value1 value2)  > 0
                     then Bigint (Neg, sub' value1 value2 0)
-                else 
+                else
                     Bigint (Pos, sub' value2 value1 0)
 
 
-        
+
 
     let mul (Bigint (neg1, value1)) (Bigint (neg2, value2))=
-        if neg1 = neg2 
-            then let _, product = mul' value1 [1] value2 in 
+        if neg1 = neg2
+            then let _, product = mul' value1 [1] value2 in
             Bigint(Pos, product)
-        else 
-            let _, product = mul'  value1 [1] value2 in 
-            Bigint(Neg, product) 
-    
+        else
+            let _, product = mul'  value1 [1] value2 in
+            Bigint(Neg, product)
+
     let div (Bigint (neg1, value1)) (Bigint (neg2, value2))=
-        if neg1 = neg2 
+        if neg1 = neg2
             then let result, _ = divrem value1 value2 in
             Bigint(Pos, result)
         else
@@ -175,13 +175,26 @@ module Bigint = struct
             Bigint(Neg, result)
 
     let rem (Bigint (neg1, value1)) (Bigint (neg2, value2))=
-        if neg1 = neg2 
+        if neg1 = neg2
             then let _, remainder = divrem value1 value2 in
-            Bigint(Pos, remainder) 
-        else 
+            Bigint(Pos, remainder)
+        else
             let _, remainder = divrem value1 value2 in
             Bigint(Neg, remainder)
- 
-    let pow = add
-end
 
+    let even value =
+      snd (divrem value [2]) = [];;
+
+let rec pow' base expt result = match expt with
+    [0] -> result
+  | expt when even expt -> let _, product = mul' base [1] base in
+                           let remainder, _ = divrem expt [2] in
+                           pow' product remainder result
+  | expt -> let _, product = mul' base [1] result in
+            pow' base (sub' expt [1] 0) product
+
+let pow (Bigint (neg1, value1)) (Bigint (neg2, value2))=
+     match neg2 with
+      Pos -> (Bigint (Pos, pow' value1 value2 [1]))
+    | Neg -> (Bigint (Pos, let final,_ = (divrem [1] (pow' value1 value2 [1])) in final))
+end
