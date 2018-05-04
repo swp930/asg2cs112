@@ -28,7 +28,7 @@ let print_number number =
 
 
 
-let print_stackempty () = printf "stack empty\n%!"
+let print_stackempty () = printf "dc: stack empty\n%!"
 
 let executereg (thestack: stack_t) (oper: char) (reg: int) =
     try match oper with
@@ -75,7 +75,7 @@ let toploop (thestack: stack_t) inputchannel =
                  | Operator oper       -> execute thestack oper
                  );
              toploop ()
-        with End_of_file -> printf "End_of_file\n%!";
+        with End_of_file -> printf "\n%!";
     in  toploop ()
 
 let readfiles () =
