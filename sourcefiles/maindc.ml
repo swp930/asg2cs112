@@ -30,10 +30,27 @@ let print_number number =
 
 let print_stackempty () = printf "dc: stack empty\n%!"
 
+(* for registers *)
+let aget = Array.get
+let aset = Array.set
+let amake = Array.make
+let ord = Char.code
+
+let symbol_table= amake 256 (false, Bigint.zero)
+
 let executereg (thestack: stack_t) (oper: char) (reg: int) =
     try match oper with
-        | 'l' -> printf "operator l reg 0%o is unimplemented\n%!" reg
-        | 's' -> printf "operator s reg 0%o is unimplemented\n%!" reg
+        | 'l' -> 
+            let entry = aget symbol_table reg in
+            (match entry with 
+                | false , _ -> printf 
+                "dc: register '%c' (0%i) is empty\n%!" (char_of_int reg) reg 
+                | true, value -> push value thestack)
+            
+        | 's' -> 
+            let entry = pop thestack in
+            aset symbol_table reg (true, entry)
+             
         | _   -> printf "0%o 0%o is unimplemented\n%!" (ord oper) reg
     with Stack.Empty -> print_stackempty()
 
