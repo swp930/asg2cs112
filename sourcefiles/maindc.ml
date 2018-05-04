@@ -44,7 +44,8 @@ let executereg (thestack: stack_t) (oper: char) (reg: int) =
             let entry = aget symbol_table reg in
             (match entry with 
                 | false , _ -> printf 
-                "dc: register '%c' (0%i) is empty\n%!" (char_of_int reg) reg 
+                    "dc: register '%c' (0%i) is empty\n%!" 
+                    (char_of_int reg) reg 
                 | true, value -> push value thestack)
             
         | 's' -> 
