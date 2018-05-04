@@ -26,26 +26,6 @@ let print_number number =
     in print_number' 0
 
 
-(*
-
-let print_number number =
-    let number' = string_of_bigint number in
-    let length = (String.length number') in
-    
-    printhelper number' 0 length
-
-let rec printhelper number count strlength =
-    
-    if count == strlength
-        then printf "\n" 
-    else if ((count mod 69) == 0 && (count !=0))
-        then printf "%c\\\n" (String.get count)
-        printhelper number (count + 1) strlength
-    else
-        printf "%c" (String.get count)
-        printhelper number (count + 1) strlength
-
-*)
 
 
 let print_stackempty () = printf "stack empty\n%!"
